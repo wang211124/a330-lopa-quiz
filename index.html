@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STARLUX A330 LOPA — Equipment Quiz v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-bright: #E0BC66;
+  --gold-dim: #7a6128;
+  --navy: #06101e;
+  --navy2: #0d1b30;
+  --navy3: #152238;
+  --navy4: #1c2f4a;
+  --navy5: #243960;
+  --text: #dde4f0;
+  --text-dim: #6a7d9a;
+  --green: #10b981;
+  --green-bg: #081f14;
+  --red: #ef4444;
+  --red-bg: #200808;
+  --border: #1c2f4a;
+  --slot-empty: #0a1422;
+  --r: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* HEADER */
+header {
+  background: linear-gradient(90deg, #020810 0%, #0d1b30 50%, #152238 100%);
+  border-bottom: 1.5px solid var(--gold-dim);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.logo { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 800; color: var(--gold); letter-spacing: 3px; }
+.logo small { color: var(--text-dim); font-weight: 400; font-size: 11px; letter-spacing: 1px; margin-left: 8px; }
+.badge { background: var(--navy4); border: 1px solid var(--gold-dim); border-radius: 5px; padding: 3px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); }
+.hdr-r { margin-left: auto; font-size: 10px; color: var(--text-dim); font-family: 'DM Mono', monospace; text-align: right; line-height: 1.5; }
+
+/* LAYOUT */
+.app { display: grid; grid-template-columns: 1fr 250px; min-height: calc(100vh - 53px); }
+
+/* LOPA PANEL */
+.lopa { padding: 14px 14px 80px 18px; overflow-y: auto; }
+
+.sec-hdr { display: flex; align-items: center; gap: 8px; margin: 16px 0 8px; }
+.sec-hdr::before { content:''; height:1px; width:14px; background:var(--gold); }
+.sec-hdr::after { content:''; flex:1; height:1px; background:linear-gradient(90deg, var(--gold-dim), transparent); }
+.sec-lbl { font-family:'Orbitron', monospace; font-size:9px; font-weight:600; color:var(--gold); letter-spacing:1.5px; white-space:nowrap; }
+
+.row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.divider { width: 2px; min-height: 40px; background: linear-gradient(180deg, transparent, var(--gold-dim) 30%, var(--gold-dim) 70%, transparent); border-radius: 2px; margin: 0 2px; align-self: stretch; }
+.spacer { flex: 1; min-width: 6px; }
+
+/* LOCATION BOX */
+.lb {
+  background: var(--navy2); border: 1.5px solid var(--border); border-radius: var(--r);
+  padding: 7px 9px; min-width: 90px; flex: 1;
+  transition: border-color 0.2s, background 0.2s;
+}
+.lb.sel-active { border-color: var(--gold); background: var(--navy3); }
+.lb.ok  { border-color: var(--green) !important; background: var(--green-bg) !important; }
+.lb.bad { border-color: var(--red)   !important; background: var(--red-bg)   !important; }
+
+.ln {
+  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  color: var(--gold); margin-bottom: 6px; letter-spacing: 0.6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.warn { font-size: 9px; background: #221800; border: 1px solid var(--gold-dim); color: #c08820; border-radius: 3px; padding: 1px 4px; font-family:'DM Sans',sans-serif; }
+
+.slots { display: flex; flex-wrap: wrap; gap: 3px; }
+.slot {
+  width: 42px; height: 28px; border-radius: 4px; border: 1.5px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+  background: var(--slot-empty); color: var(--text-dim); user-select: none;
+  transition: all 0.12s;
+}
+.slot:hover { border-color: var(--gold-dim); }
+.slot.hl { border-color: var(--gold); border-style: solid; animation: glow .8s ease-in-out infinite alternate; }
+@keyframes glow { from { box-shadow: none; } to { box-shadow: 0 0 5px 1px rgba(201,168,76,.4); } }
+.slot.fil { border-style: solid; }
+.slot.fil:hover { opacity: 0.65; }
+
+/* PALETTE */
+.pal { background: var(--navy2); border-left: 1.5px solid var(--border); padding: 14px 12px 80px; overflow-y: auto; position: sticky; top: 53px; height: calc(100vh - 53px); }
+.pal-ttl { font-family:'Orbitron',monospace; font-size:9.5px; font-weight:600; color:var(--gold); letter-spacing:1.5px; margin-bottom:5px; }
+.pal-hint { font-size:10px; color:var(--text-dim); margin-bottom:12px; padding-left:8px; border-left:2px solid var(--gold-dim); line-height:1.6; }
+
+.pi {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  border-radius: 6px; cursor: pointer; margin-bottom: 4px;
+  border: 1.5px solid transparent; background: var(--navy); transition: all 0.12s;
+}
+.pi:hover { border-color: rgba(201,168,76,.25); background: var(--navy3); }
+.pi.sel { border-color: var(--gold); background: var(--navy4); box-shadow: 0 0 10px rgba(201,168,76,.2); }
+.ibadge {
+  width: 36px; height: 22px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 500;
+  flex-shrink: 0; border: 1px solid;
+}
+.ilbl { font-size: 10.5px; color: var(--text); line-height: 1.2; }
+.isub { font-size: 9px; color: var(--text-dim); }
+
+/* BOTTOM BAR */
+.bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(6,16,30,.97); border-top: 1.5px solid var(--gold-dim);
+  padding: 9px 18px; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; z-index: 100; backdrop-filter: blur(8px);
+}
+.prog-wrap { display: flex; align-items: center; gap: 10px; }
+.prog-out { width: 140px; height: 5px; background: var(--navy4); border-radius: 3px; overflow: hidden; }
+.prog-in { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width .3s; }
+.prog-txt { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); white-space:nowrap; }
+.btn { padding: 8px 18px; border-radius: 7px; border: none; cursor: pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; transition: all .12s; white-space:nowrap; }
+.btn-g { background: var(--navy4); color: var(--text-dim); border: 1px solid var(--navy5); }
+.btn-g:hover { background: var(--navy5); color: var(--text); }
+.btn-p { background: linear-gradient(135deg, var(--gold-dim), var(--gold)); color: var(--navy); }
+.btn-p:hover { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,.3); }
+
+/* MODAL */
+.mo { display:none; position:fixed; inset:0; background:rgba(3,8,15,.9); align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(4px); }
+.mo.show { display:flex; }
+.md { background:var(--navy2); border:1.5px solid var(--gold-dim); border-radius:14px; padding:28px; width:530px; max-width:95vw; max-height:82vh; display:flex; flex-direction:column; gap:14px; animation:mi .22s ease; }
+@keyframes mi { from{transform:scale(.9) translateY(16px);opacity:0} to{transform:none;opacity:1} }
+.md-ttl { font-family:'Orbitron',monospace; font-size:14px; font-weight:600; color:var(--gold); text-align:center; letter-spacing:1px; }
+.score-wrap { text-align:center; padding:12px 0; }
+.score-num { font-family:'Orbitron',monospace; font-size:48px; font-weight:800; line-height:1; }
+.score-sub { font-size:11px; color:var(--text-dim); margin-top:3px; font-family:'DM Mono',monospace; }
+.err-scroll { overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:6px; max-height:280px; }
+.ec { background:#180808; border:1px solid rgba(239,68,68,.28); border-radius:7px; padding:9px 12px; }
+.ec-name { font-family:'DM Mono',monospace; font-size:10.5px; color:var(--red); font-weight:500; margin-bottom:5px; }
+.ec-row { display:flex; gap:6px; align-items:flex-start; font-size:10px; margin-bottom:3px; }
+.ec-lbl { color:var(--text-dim); width:54px; flex-shrink:0; font-family:'DM Mono',monospace; }
+.etags { display:flex; flex-wrap:wrap; gap:3px; }
+.etag { padding:2px 6px; border-radius:3px; font-family:'DM Mono',monospace; font-size:8.5px; font-weight:500; border:1px solid; }
+.notice { background:#1a1300; border:1px solid #4a3600; border-radius:5px; padding:7px 10px; font-size:10px; color:#b08020; line-height:1.5; }
+.ok-card { background:#040e08; border:1px solid rgba(16,185,129,.2); border-radius:7px; padding:12px; text-align:center; font-size:12px; color:var(--green); }
+.md-ft { display:flex; gap:8px; justify-content:flex-end; margin-top:2px; }
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--navy)} ::-webkit-scrollbar-thumb{background:var(--navy5);border-radius:2px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">✦ STARLUX <small>AIRLINES</small></div>
+  </div>
+  <div class="badge">A330-900 · LOPA of EE</div>
+  <div class="badge" style="color:var(--text);border-color:var(--border)">Ch 13.3</div>
+  <div class="hdr-r">Cabin Crew Operations Manual<br>Doc: STARLUX-CCD-001 Rev.16</div>
+</header>
+
+<div class="app">
+  <div class="lopa" id="lopa"></div>
+  <div class="pal" id="pal">
+    <div class="pal-ttl">⬡ 設備清單 (18種)</div>
+    <div class="pal-hint">① 點選設備選取<br>② 點空格放入<br>③ 點已放取回/換掉<br>Esc 取消選取</div>
+    <div id="pal-items"></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:9.5px;color:var(--text-dim);font-family:'DM Mono',monospace;line-height:1.6">⚠ 標示位置<br>以目視讀圖為準<br>請以手冊為準</div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="prog-wrap">
+    <div class="prog-out"><div class="prog-in" id="pg-bar" style="width:0%"></div></div>
+    <div class="prog-txt" id="pg-txt">0 / 0 已填</div>
+  </div>
+  <div style="display:flex;gap:7px">
+    <button class="btn btn-g" onclick="clearAll()">清除全部</button>
+    <button class="btn btn-p" onclick="checkAll()">✓ 提交答案</button>
+  </div>
+</div>
+
+<div class="mo" id="modal">
+  <div class="md">
+    <div class="md-ttl" id="m-title">📋 測驗結果</div>
+    <div class="score-wrap">
+      <div class="score-num" id="m-score">—</div>
+      <div class="score-sub">位置正確 / 全部位置</div>
+    </div>
+    <div class="err-scroll" id="m-body"></div>
+    <div class="md-ft">
+      <button class="btn btn-g" onclick="closeModal()">返回繼續修改</button>
+      <button class="btn btn-p" onclick="clearAll();closeModal()">重新開始</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 18 EQUIPMENT TYPES  (Image 1 — Onboard Placard)
+// ══════════════════════════════════════════════
+const EQ = {
+  TRH:  { lbl:'手電筒',          sub:'Flashlight',            c:'#94a3b8', bg:'#131820' },
+  MEG:  { lbl:'擴音器',          sub:'Megaphone',             c:'#f59e0b', bg:'#231800' },
+  MRT:  { lbl:'MRT',             sub:'Manual Release Tool',   c:'#78909c', bg:'#121820' },
+  DEMO: { lbl:'Demo Kit',        sub:'Demo Kit',              c:'#a78bfa', bg:'#160e2a' },
+  LVC:  { lbl:'救生衣 (機組員)', sub:'Life Vest (Crew)',      c:'#f43f5e', bg:'#220810' },
+  FIRE: { lbl:'滅火瓶',          sub:'Fire Extinguisher',     c:'#ef4444', bg:'#200808' },
+  PBE:  { lbl:'PBE 防煙面罩',    sub:'Protective Breathing',  c:'#dc2626', bg:'#1e0606' },
+  FRG:  { lbl:'防火手套',        sub:'Fire Resistant Glove',  c:'#f97316', bg:'#231000' },
+  ELT:  { lbl:'ELT 緊急定位',    sub:'Emergency Locator',     c:'#06b6d4', bg:'#081e24' },
+  O2:   { lbl:'O₂ 氧氣瓶',       sub:'Portable O2 Bottle',   c:'#10b981', bg:'#082214' },
+  EMK:  { lbl:'EMK 急救醫療箱',  sub:'Emergency Medical Kit', c:'#0ea5e9', bg:'#081822' },
+  FAK:  { lbl:'FAK 急救箱',      sub:'First Aid Kit',         c:'#22c55e', bg:'#082210' },
+  AED:  { lbl:'AED 去顫器',      sub:'AED',                   c:'#ec4899', bg:'#22081a' },
+  AED2: { lbl:'AED (衛福部)',     sub:'AED (Taiwan MOH)',      c:'#f43f5e', bg:'#260610' },
+  UPK:  { lbl:'UPK 防護套件',    sub:'Universal Precaution',  c:'#a855f7', bg:'#180e28' },
+  LVA:  { lbl:'救生衣 (成人)',   sub:'Life Vest (Adult)',     c:'#eab308', bg:'#221c00' },
+  LVI:  { lbl:'救生衣 (嬰兒)',   sub:'Life Vest (Infant)',    c:'#d97706', bg:'#201400' },
+  ESB:  { lbl:'延伸安全帶',      sub:'Extension Seat Belt',   c:'#64748b', bg:'#121820' },
+  HAMR: { lbl:'錘子',           sub:'Hammer',                c:'#94a3b8', bg:'#1a1c22' },
+  SPAR: { lbl:'備用O₂面罩',     sub:'Spare O2 Mask',         c:'#67e8f9', bg:'#061e24' },
+};
+
+// ══════════════════════════════════════════════
+// LOPA DATA  —  corrected from clearer image
+// ⚠ warn:true = visually read, verify vs manual
+// ══════════════════════════════════════════════
+const SECS = [
+  {
+    title:'DOOR 1 — 第一艙門區',
+    rows:[
+      [
+        { id:'1L_AS',   name:'1L AS',      items:['LVC','DEMO','TRH'] },
+        { id:'1LA_AS',  name:'1LA AS',     items:['LVC','MRT','TRH','FIRE'] },
+        '|',
+        { id:'COCKPIT', name:'Cockpit',    items:['PBE','TRH','TRH','FIRE','LVC','LVC','LVC','LVC','FRG','HAMR'] },
+      ],
+      [
+        { id:'DFRAME',  name:'Door Frame', items:['MEG'] },
+        { id:'STOW',    name:'Stowage',    items:['PBE'] },
+        '|',
+        { id:'1R_AS',   name:'1R AS',      items:['TRH','FIRE','LVC','MRT','DEMO'] },
+        { id:'ABV_1R',  name:'Above AS',   items:['PBE'] },
+      ],
+      [
+        { id:'1LC_AS',  name:'1LC AS',     items:['LVC','TRH','LVI','LVI','LVI','LVI'] },
+      ],
+    ]
+  },
+  {
+    title:'OHSC (1↔2) — 頭頂儲物艙',
+    rows:[
+      [
+        { id:'8C_OHSC', name:'8C OHSC', items:['O2','O2'] },
+        { id:'8E_OHSC', name:'8E OHSC', items:['AED','AED','AED','AED'] },
+        '|',
+        { id:'2C_OHSC', name:'2C OHSC', items:['O2','O2','FAK','FAK'] },
+        { id:'2K_OHSC', name:'2K OHSC', items:['O2'] },
+        '|',
+        { id:'8K_OHSC', name:'8K OHSC', items:['ELT'] },
+      ],
+    ]
+  },
+  {
+    title:'DOOR 2 — 第二艙門區',
+    rows:[
+      [
+        { id:'NAS_2L',  name:'Next to AS', items:['PBE'] },
+        { id:'2L_AS',   name:'2L AS',      items:['MRT','FIRE','LVC','TRH','ESB'] },
+        '|',
+        { id:'2R_AS',   name:'2R AS',      items:['TRH','FIRE','LVC','MRT','DEMO'] },
+        { id:'NAS_2R',  name:'Next to AS', items:['PBE'] },
+      ],
+    ]
+  },
+  {
+    title:'DOOR 3 — 第三艙門區 & 醫療設備',
+    rows:[
+      [
+        { id:'DHS_L3',  name:'DHS L',  items:['AED','AED','AED','AED'] },
+        { id:'DHS_LC3', name:'DHS LC', items:['O2','O2'] },
+        '|',
+        { id:'DHS_3R',  name:'DHS',   items:['O2','O2'] },
+        { id:'C5',      name:'C5',    items:['FAK','FAK','EMK','UPK','UPK'] },
+      ],
+      [
+        { id:'NAS_3L',  name:'Next to AS', items:['PBE'] },
+        { id:'3L_AS',   name:'3L AS',      items:['MRT','FIRE','LVC','TRH','ESB'] },
+        '|',
+        { id:'3R_AS',   name:'3R AS',      items:['MRT','FIRE','LVC','TRH','ESB'] },
+        { id:'NAS_3R',  name:'Next to AS', items:['PBE'] },
+      ],
+    ]
+  },
+  {
+    title:'OHSC (3↔4) — 頭頂儲物艙',
+    rows:[
+      [
+        { id:'68AC',  name:'68AC OHSC', items:['MEG','ELT'] },
+        '|',
+        { id:'68HK',  name:'68HK OHSC', items:['AED','LVA','ESB','ESB','SPAR'] },
+      ],
+      [
+        { id:'DHS_L4',  name:'DHS L',   items:['AED','AED','AED','AED'] },
+        { id:'DHS_LC4', name:'DHS LC',  items:['O2','O2'] },
+        '|',
+        { id:'DHS_RC4', name:'DHS RC',  items:['O2','O2'] },
+      ],
+    ]
+  },
+  {
+    title:'DOOR 4 — 第四艙門區',
+    rows:[
+      [
+        { id:'ABV_4L',  name:'Above AS', items:['PBE'] },
+        { id:'4L_AS',   name:'4L AS',    items:['FRG','MRT','FIRE','LVC','TRH','ESB'] },
+        '|',
+        { id:'4R_AS',   name:'4R AS',    items:['MRT','FIRE','LVC','TRH','ESB','FRG'] },
+        { id:'ABV_4R',  name:'Above AS', items:['PBE'] },
+      ],
+      [
+        's',
+        { id:'4LCRC_AS', name:'4LC AS  4RC AS', items:['MRT','LVA','LVA','MRT'] },
+        's',
+      ],
+    ]
+  },
+];
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const allLocs = {};
+SECS.forEach(s=>s.rows.forEach(r=>r.forEach(l=>{ if(l&&l.id){ allLocs[l.id]=l; } })));
+
+const placed = {};
+Object.keys(allLocs).forEach(k=>{ placed[k]=new Array(allLocs[k].items.length).fill(null); });
+
+let sel = null;
+let showRes = false;
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function render() { renderLOPA(); renderPal(); updateProg(); }
+
+function renderLOPA() {
+  const el = document.getElementById('lopa');
+  el.innerHTML = '';
+  SECS.forEach(sec => {
+    const sh = document.createElement('div');
+    sh.className = 'sec-hdr';
+    sh.innerHTML = `<span class="sec-lbl">${sec.title}</span>`;
+    el.appendChild(sh);
+
+    sec.rows.forEach(row => {
+      const re = document.createElement('div');
+      re.className = 'row';
+      row.forEach(item => {
+        if (item==='|') {
+          re.appendChild(Object.assign(document.createElement('div'),{className:'divider'}));
+        } else if (item==='s') {
+          re.appendChild(Object.assign(document.createElement('div'),{className:'spacer'}));
+        } else if (item&&item.id) {
+          re.appendChild(buildBox(item));
+        }
+      });
+      el.appendChild(re);
+    });
+  });
+}
+
+function buildBox(loc) {
+  const p = placed[loc.id];
+  const box = document.createElement('div');
+  box.className = 'lb';
+  if (showRes) box.classList.add(locOK(loc.id)?'ok':'bad');
+  else if (sel) box.classList.add('sel-active');
+
+  const nm = document.createElement('div');
+  nm.className = 'ln';
+  nm.textContent = loc.name;
+  if (loc.warn) nm.insertAdjacentHTML('beforeend','<span class="warn">⚠</span>');
+  box.appendChild(nm);
+
+  const sl = document.createElement('div');
+  sl.className = 'slots';
+
+  for (let i=0; i<loc.items.length; i++) {
+    const id = p[i];
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    if (id) {
+      const d = EQ[id];
+      slot.classList.add('fil');
+      slot.style.cssText = `background:${d.bg};border-color:${d.c};color:${d.c}`;
+      slot.textContent = id==='AED2'?'AED₂':id;
+      slot.title = d.lbl+' — 點擊取回';
+      slot.onclick = () => { placed[loc.id][i] = sel||null; showRes=false; render(); };
+    } else {
+      if (sel) slot.classList.add('hl');
+      slot.textContent = '+';
+      slot.onclick = () => { if(sel){ placed[loc.id][i]=sel; showRes=false; render(); } };
+    }
+    sl.appendChild(slot);
+  }
+  box.appendChild(sl);
+  return box;
+}
+
+function renderPal() {
+  const el = document.getElementById('pal-items');
+  el.innerHTML = '';
+  Object.entries(EQ).forEach(([id,d]) => {
+    const pi = document.createElement('div');
+    pi.className = 'pi'+(sel===id?' sel':'');
+    pi.innerHTML = `
+      <div class="ibadge" style="background:${d.bg};color:${d.c};border-color:${d.c}">${id==='AED2'?'AED₂':id}</div>
+      <div><div class="ilbl">${d.lbl}</div><div class="isub">${d.sub}</div></div>`;
+    pi.onclick = () => { sel = sel===id?null:id; render(); };
+    el.appendChild(pi);
+  });
+}
+
+function updateProg() {
+  let tot=0, fil=0;
+  Object.values(placed).forEach(a=>{ tot+=a.length; fil+=a.filter(Boolean).length; });
+  const pct = tot>0?Math.round(fil/tot*100):0;
+  document.getElementById('pg-txt').textContent = `${fil} / ${tot} 已填`;
+  document.getElementById('pg-bar').style.width = pct+'%';
+}
+
+// ══════════════════════════════════════════════
+// LOGIC
+// ══════════════════════════════════════════════
+function locOK(id) {
+  const p = placed[id].filter(Boolean);
+  const c = allLocs[id].items;
+  if (p.length!==c.length) return false;
+  const pf={}, cf={};
+  p.forEach(x=>pf[x]=(pf[x]||0)+1);
+  c.forEach(x=>cf[x]=(cf[x]||0)+1);
+  const ks = new Set([...Object.keys(pf),...Object.keys(cf)]);
+  for (const k of ks) if((pf[k]||0)!==(cf[k]||0)) return false;
+  return true;
+}
+
+function tagHTML(id) {
+  if (!id||id==='—') return `<span class="etag" style="color:#555;border-color:#333">—</span>`;
+  const d = EQ[id];
+  const lbl = id==='AED2'?'AED₂':id;
+  return `<span class="etag" style="color:${d.c};border-color:${d.c};background:${d.bg}">${lbl}</span>`;
+}
+
+function checkAll() {
+  showRes = true; sel = null; render();
+  let ok=0, tot=0; const errs=[];
+
+  SECS.forEach(s=>s.rows.forEach(r=>r.forEach(l=>{
+    if(!l||!l.id) return; tot++;
+    if(locOK(l.id)) ok++;
+    else errs.push({ name:l.name, placed:[...placed[l.id]], expected:l.items, warn:l.warn });
+  })));
+
+  const pct = Math.round(ok/tot*100);
+  document.getElementById('m-title').textContent = pct===100?'🎉 完美！全部正確！':'📋 測驗結果';
+  const sc = document.getElementById('m-score');
+  sc.textContent = `${ok} / ${tot}`;
+  sc.style.color = pct===100?'var(--green)':pct>=75?'var(--gold)':'var(--red)';
+
+  const body = document.getElementById('m-body');
+  body.innerHTML = '';
+
+  if (errs.length===0) {
+    body.innerHTML = '<div class="ok-card">✅ 所有設備位置完全正確！<br><span style="font-size:11px;opacity:.7">LOPA熟悉度：優秀</span></div>';
+  } else {
+    if (errs.some(e=>e.warn)) {
+      const n = document.createElement('div');
+      n.className = 'notice';
+      n.textContent = '⚠ 標有 ⚠ 位置的答案為目視讀圖，如有出入請以實際手冊 Rev.16 確認。';
+      body.appendChild(n);
+    }
+    errs.forEach(e => {
+      const c = document.createElement('div');
+      c.className = 'ec';
+      const ptags = e.placed.map(x=>tagHTML(x||'—')).join('');
+      const etags = e.expected.map(x=>tagHTML(x)).join('');
+      c.innerHTML = `<div class="ec-name">❌ ${e.name}${e.warn?' ⚠':''}</div>
+        <div class="ec-row"><span class="ec-lbl">你放的：</span><div class="etags">${ptags}</div></div>
+        <div class="ec-row" style="margin-top:3px"><span class="ec-lbl">正確答案：</span><div class="etags">${etags}</div></div>`;
+      body.appendChild(c);
+    });
+  }
+  document.getElementById('modal').classList.add('show');
+}
+
+function clearAll() {
+  Object.keys(placed).forEach(k=>{ placed[k]=placed[k].map(()=>null); });
+  showRes=false; sel=null; render();
+}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){sel=null;render();} });
+render();
+</script>
+</body>
+</html>
